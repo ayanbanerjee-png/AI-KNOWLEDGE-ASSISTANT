@@ -38,6 +38,9 @@ flowchart TD
     end
 ```
 
+### Visual Schematic Diagram
+![AI Knowledge Assistant System Architecture Diagram](./architecture_diagram.svg)
+
 ---
 
 ## 🛠️ Technical Foundations & Cloud Mapping

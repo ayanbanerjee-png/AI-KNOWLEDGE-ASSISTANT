@@ -25,3 +25,6 @@ Thumbs.db
 *.log
 *.tmp
 /python-installer.exe
+
+# ── Private / Local Only ──────────────────
+**/PROJECT_REPORT.md
