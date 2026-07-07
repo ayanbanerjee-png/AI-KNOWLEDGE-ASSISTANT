@@ -210,6 +210,46 @@ The `Makefile` exposes automated tasks to simplify project execution:
 
 ---
 
+## 🕹️ Demo Walkthrough & Script Testing
+
+To demonstrate the capabilities of the system without starting the web UI, you can run various pipeline scripts directly from your CLI:
+
+### 1. Ingestion Pipeline Demo
+Run the text ingestion and cleaning logic over files inside `data/raw/`:
+```bash
+python core/ingestor.py
+```
+
+### 2. Embeddings & Index Building Demo
+Embed the processed chunks and load them into the FAISS local database:
+```bash
+python core/embedder.py
+```
+To run an incremental update indexing only newly added files:
+```bash
+python core/embedder.py --update
+```
+
+### 3. Local Similarity Search (Retriever) Demo
+Directly search for context passages in the local database matching a natural query:
+```bash
+python core/retriever.py "How do I report a security vulnerability?"
+```
+
+### 4. Local RAG Generation Demo
+Call the Ollama model directly to answer questions based strictly on retrieved context documents, printing structured citations:
+```bash
+python core/generator.py "How do I report a security vulnerability?"
+```
+
+### 5. PII Redaction Demo
+Verify the pattern matcher and redactor rules used for privacy:
+```bash
+python core/security.py
+```
+
+---
+
 ## 📊 Evaluation & Verification
 
 To verify the system performance, evaluate the retriever against the mock questions stored in the database:
