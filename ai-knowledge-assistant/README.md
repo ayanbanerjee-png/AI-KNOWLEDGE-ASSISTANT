@@ -1,0 +1,252 @@
+# 🧠 AI Knowledge Assistant (v2.0.0)
+
+A production-grade, local RAG-based knowledge assistant built with a **FastAPI** backend, a **Next.js** frontend, **Ollama** for local LLM orchestration, and **FAISS** for vector retrieval. 
+
+This repository implements a complete pipeline for document ingestion, processing, embedding, semantic search, generative answering, security compliance (PII redaction), query metrics tracking, evaluation, and structured exporting.
+
+---
+
+## 🏗️ Architecture Overview
+
+The system operates entirely offline, ensuring data privacy and zero API costs. Below is the system flow showing how raw files are ingested, indexed, retrieved, and sent to the local LLM.
+
+```mermaid
+flowchart TD
+    subgraph Data Ingestion
+        A[Raw Docs: .md, .pdf, .docx, .csv] --> B(Ingestor & Text Cleaner)
+        B --> C[Processed Chunks]
+    end
+
+    subgraph Embedding & Vector Indexing
+        C --> D(SentenceTransformer)
+        D --> E[(FAISS Vector Store)]
+        E -->|Auto-Reload Cache| F(Retriever)
+    end
+
+    subgraph API & Generation
+        G[User Query via UI] --> H(FastAPI Web Server)
+        H -->|Verify Token| I(Security & PII Redaction)
+        I -->|Sanitized Query| F
+        F -->|Top-K Context Chunks| J(Ollama LLM Orchestrator)
+        J -->|Answer Generation| K(Response & Citation Builder)
+        K -->|SQLite Log| L[(Logs Database)]
+    end
+
+    subgraph Output Formatting
+        K --> M(Export Endpoint)
+        M --> N[DOCX / XLSX / PDF / JSON / MD / TXT]
+    end
+```
+
+---
+
+## ⚡ Key Features
+
+*   **⚡ Multi-Format Document Ingestion:** Built-in extraction parser supports Markdown (`.md`), PDF (`.pdf`), MS Word (`.docx`), and CSV (`.csv`) formats. Custom logic cleans up styling syntax, normalizes layout anomalies, and splits documents into configurable overlapping chunks.
+*   **📂 Incremental Vector Storage:** Encodes text using the high-performance sentence embedding model `BAAI/bge-small-en-v1.5`. The FAISS index supports incremental updates (`--update` mode) and maintains a file registry to avoid redundant vector computation.
+*   **🔄 Auto-Reloading Retriever Cache:** The retriever automatically detects file modifications (`mtime`) in the vector database and reloads the indexes on-the-fly, avoiding API restarts after background indexing completes.
+*   **🔒 Security & PII Redaction:** Sanitizes queries by matching patterns for email, telephone numbers (US, India, UK), credit cards, IP addresses, US SSNs, and passport numbers. PII is redacted from questions prior to database logging. Contains token authentication and ethical usage checks.
+*   **📊 Local Evaluation & Monitoring:** Logs system metrics to SQLite. Metrics calculated per request include:
+    *   **Recall@K:** Percentage of retrieved chunks with a similarity score exceeding the relevance boundary (`>= 0.55`).
+    *   **Citation Coverage:** Ratio of retrieved passages actually cited (`[Source N]`) in the generated answer.
+    *   **Grounding Score:** Text overlap between the generated answer and retrieved context to measure grounding.
+    *   **Matplotlib Dashboard:** Visualizes latency, recall over time, grounding, and citation coverage.
+*   **📥 Premium Export Formats:** Supports downloading generated answers in 6 formats:
+    *   `docx`: Styled Word documents using custom spacing and layouts.
+    *   `xlsx`: Formatted Excel tables with color-coded headers and auto-wrapped text.
+    *   `pdf`: ReportLab generated PDFs, featuring rendering of tables, text structures, and metadata footers.
+    *   `json`, `md`, `txt`: Standard raw developer exports.
+
+---
+
+## 📁 Repository Structure
+
+```text
+ai-knowledge-assistant/
+├── api/
+│   └── main.py                 # FastAPI Application Entrypoint
+├── core/
+│   ├── embedder.py             # Vector Indexer (Full / Incremental updates)
+│   ├── generator.py            # RAG Answer Generator & API Endpoints
+│   ├── ingestor.py             # Document Ingestion & Chunking Parser
+│   ├── logger.py               # SQLite Log Management & Metric Computation
+│   ├── retriever.py            # FAISS Vector Retrieval and Cache Management
+│   └── security.py             # API Token Verification & PII Redactor
+├── data/                       # Local Storage (Not Committed)
+│   ├── raw/                    # Uploaded / Synthetic raw documents
+│   ├── processed/              # Cleaned document chunks (.json)
+│   ├── vector_store/           # FAISS index and metadata registry
+│   └── logs.db                 # SQLite query and evaluation database
+├── tools/
+│   ├── synth_data.py           # Generates synthetic Acme Corp documents
+│   ├── evaluate.py             # Evaluates retriever against test questions
+│   └── benchmark.py            # Performance benchmarks (Placeholder)
+├── ui/                         # Next.js Frontend Dashboard (React / Tailwind)
+│   ├── app/
+│   │   ├── globals.css         # Styling system
+│   │   ├── layout.tsx          # Page frame
+│   │   └── page.tsx            # Interactive chat, upload, & metrics workspace
+│   ├── components/             # Reusable UI component modules
+│   └── package.json            # Frontend Node package file
+├── Makefile                    # Process automation scripts
+├── requirements.txt            # Python dependencies configuration
+└── .env                        # Environment configurations
+```
+
+---
+
+## ⚙️ Environment Variables
+
+Create a `.env` file in the project root:
+
+```ini
+# LLM & Ollama Configuration
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=mistral
+OLLAMA_KEEP_ALIVE=true
+
+# Embedding Configuration
+EMBEDDING_MODEL=BAAI/bge-small-en-v1.5
+
+# Security Access
+API_TOKEN=your-secret-token-here
+
+# Storage Paths
+SQLITE_PATH=./data/logs.db
+RAW_DATA_PATH=./data/raw
+PROCESSED_DATA_PATH=./data/processed
+
+# RAG Settings
+CHUNK_SIZE=750
+CHUNK_OVERLAP=100
+TOP_K=5
+```
+
+Create a `ui/.env.local` file under the `ui/` directory:
+
+```ini
+BACKEND_URL=http://localhost:8000
+API_TOKEN=your-secret-token-here
+```
+
+---
+
+## 🚀 Quickstart Guide
+
+### 1. Prerequisites
+Ensure you have the following installed on your machine:
+*   [Python 3.10+](https://www.python.org/downloads/)
+*   [Node.js 18+](https://nodejs.org/)
+*   [Ollama](https://ollama.com/) installed and running locally
+
+### 2. Download LLM Models
+Start the Ollama daemon and pull the models used by the system:
+```bash
+ollama pull mistral:7b
+ollama pull llama3.1:8b
+```
+
+### 3. Installation
+Install the required Python and Node.js dependencies using the automated Makefile target:
+```bash
+make install
+```
+*This installs python requirements and runs `npm install` inside the `ui/` folder.*
+
+### 4. Populate & Build the Vector Index
+Generate mock corporate SOPs, ingest the data, and build the initial vector index:
+```bash
+make reindex
+```
+*This runs `synth_data.py`, ingests/cleans documents, and runs the full embedder sequence.*
+
+### 5. Launch the Application
+Run both the FastAPI backend and Next.js frontend concurrently:
+```bash
+make run
+```
+*This spins up the FastAPI server on `http://localhost:8000` and the web interface on `http://localhost:3000`.*
+
+---
+
+## 🛠️ Developer Utility Commands
+
+The `Makefile` exposes automated tasks to simplify project execution:
+
+| Command | Action |
+| :--- | :--- |
+| `make install` | Installs backend packages from `requirements.txt` and frontend modules. |
+| `make run` | Starts the backend (`uvicorn`) and UI (`next dev`) concurrently. |
+| `make reindex` | Re-generates mock data, runs document ingestion, and computes vector store updates. |
+| `make eval` | Runs the test evaluation suite to check top-k retrieval accuracy. |
+
+---
+
+## 📊 Evaluation & Verification
+
+To verify the system performance, evaluate the retriever against the mock questions stored in the database:
+```bash
+make eval
+```
+
+This runs `tools/evaluate.py`, comparing top search results against expected ground-truth sources. When finished, it outputs a summary containing the accuracy percentage and aggregate query scores.
+
+To generate a performance dashboard chart (`data/eval_dashboard.png`), execute:
+```bash
+python core/logger.py
+```
+*This aggregates the sqlite logging entries and generates Matplotlib curves demonstrating Latency over time, Recall@k over time, and Grounding and Citation coverage distributions.*
+
+---
+
+## 🔌 API Endpoints Summary
+
+All backend communication passes through the FastAPI application running on `http://localhost:8000`.
+
+### 1. Root Status
+*   **Endpoint:** `GET /`
+*   **Headers:** None
+*   **Response:**
+    ```json
+    {"status": "ok", "message": "AI Knowledge Assistant is running"}
+    ```
+
+### 2. Query Agent (RAG)
+*   **Endpoint:** `POST /ask`
+*   **Headers:** `Authorization: Bearer <API_TOKEN>`
+*   **Request Payload:**
+    ```json
+    {
+      "question": "How do I report a security vulnerability?",
+      "top_k": 5
+    }
+    ```
+*   **Response Payload:** Returns the text answer and citations containing source snippets, matching relevance scores, and confidence classifications.
+
+### 3. File Upload
+*   **Endpoint:** `POST /upload`
+*   **Headers:** `Authorization: Bearer <API_TOKEN>`
+*   **Request Payload:** Multipart Form Data (`file`)
+*   **Response Payload:** Upload completion status and final filename (renamed if name collides).
+
+### 4. Vector Reindexing
+*   **Endpoint:** `POST /reindex`
+*   **Headers:** `Authorization: Bearer <API_TOKEN>`
+*   **Request Payload:**
+    ```json
+    {
+      "mode": "update"
+    }
+    ```
+    *(Set `mode` to `full` to clear database and force rebuild; defaults to `update` for incremental ingestion).*
+
+### 5. Document Exporter
+*   **Endpoint:** `POST /export`
+*   **Headers:** `Authorization: Bearer <API_TOKEN>`
+*   **Request Payload:** Pass format extension (`pdf`, `docx`, `xlsx`, `json`, `md`, `txt`) alongside the question, answer context, and citation list.
+*   **Response:** File download attachment stream.
+
+### 6. Aggregated Metrics
+*   **Endpoint:** `GET /metrics`
+*   **Headers:** None
+*   **Response:** Provides aggregate statistics (avg latency, avg grounding score, total queries count) and a list of the 10 most recent query logs.

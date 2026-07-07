@@ -1,0 +1,43 @@
+﻿# LLM
+ollama==0.2.1
+
+# Embeddings
+sentence-transformers==2.7.0
+torch==2.2.2
+
+# Vector DB
+faiss-cpu==1.8.0
+
+# NumPy — keep below 2.0 for compatibility
+numpy==1.26.4
+
+# Parsing
+pymupdf==1.24.1
+docx2txt==0.8
+pandas==2.2.1
+unstructured==0.10.30
+
+# Image ingestion
+pytesseract==0.3.10
+easyocr==1.7.1
+Pillow==10.3.0
+
+# API
+fastapi==0.111.0
+uvicorn==0.29.0
+python-dotenv==1.0.1
+pydantic==2.7.0
+
+# Exports
+python-docx==1.1.2
+openpyxl==3.1.2
+
+# Security
+python-jose==3.3.0
+passlib==1.7.4
+
+# Monitoring
+matplotlib==3.8.4
+
+# Utilities
+packaging

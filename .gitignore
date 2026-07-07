@@ -1,0 +1,27 @@
+# ── Python ────────────────────────────────
+**/.venv/
+**/__pycache__/
+**/*.pyc
+
+# ── Environment secrets ───────────────────
+**/.env
+**/.env.local
+
+# ── Data folders ──────────────────────────
+**/data/
+
+# ── Dependencies & Build Output ───────────
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/*.tsbuildinfo
+
+# ── OS files ──────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Misc ──────────────────────────────────
+*.log
+*.tmp
+/python-installer.exe
