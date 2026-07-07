@@ -38,8 +38,13 @@ flowchart TD
     end
 ```
 
-### Visual Schematic Diagram
+### Visual Schematic Diagrams
+
+#### 1. RAG Data Flow Pipeline
 ![AI Knowledge Assistant System Architecture Diagram](./architecture_diagram.svg)
+
+#### 2. Frontend-Backend Application Design
+![AI Knowledge Assistant Frontend-Backend System Design](./frontend_backend_architecture.svg)
 
 ---
 
