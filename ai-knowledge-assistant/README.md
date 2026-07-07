@@ -40,6 +40,34 @@ flowchart TD
 
 ---
 
+## 🛠️ Technical Foundations & Cloud Mapping
+
+Everything runs locally using open-source tools. The technologies are selected to mirror how the architecture would scale in Azure or AWS.
+
+| Layer | Suggested Local / Open Source Tools | Cloud Equivalent (Azure / AWS) |
+| :--- | :--- | :--- |
+| **LLM / Chat** | Ollama (Llama 3.1+, Qwen 2.5, Mistral, Mixtral) | Azure OpenAI / AWS Bedrock |
+| **Embeddings** | Sentence-Transformers (`BAAI/bge-small-en-v1.5`, MiniLM) | Azure Cognitive Search Embeddings / AWS Titan |
+| **Vector DB** | FAISS / Chroma (with HNSW index where supported) | Azure AI Search (Cognitive Search) / AWS Kendra |
+| **API Server** | FastAPI / Express | Azure Functions / AWS Lambda |
+| **Frontend UI** | Next.js / Streamlit | Azure App Service / AWS CloudFront + S3 |
+| **Parsing** | PyMuPDF, docx2txt, pandas, unstructured | Azure Form Recognizer / AWS Textract |
+| **Storage** | SQLite / PostgreSQL | Azure SQL Database / AWS RDS or S3 |
+| **Exports** | python-docx, openpyxl | OpenXML |
+| **Monitoring & Logs** | SQLite logs, Matplotlib charts, JSON trace logs | Azure Application Insights / AWS CloudWatch |
+
+---
+
+## 🎯 Success Criteria & Expected Outcomes
+
+By completing and reviewing this project, you should be able to:
+*   **Explain RAG Pipelines:** Understand data flow from raw documents, processing, embedding creation, similarity retrieval, prompt packaging, and generation.
+*   **Run & Extend Locally:** Maintain, deploy, and scale a functional local-first artificial intelligence solution on developer workstations.
+*   **Cloud Architecture Alignment:** Architect projects using local paradigms that map cleanly to cloud native services (AWS/Azure).
+*   **Demonstrate Key Skills:** Apply practical skills in vector databases, parsing documents, handling exports, and building evaluation sets.
+
+---
+
 ## ⚡ Key Features
 
 *   **⚡ Multi-Format Document Ingestion:** Built-in extraction parser supports Markdown (`.md`), PDF (`.pdf`), MS Word (`.docx`), and CSV (`.csv`) formats. Custom logic cleans up styling syntax, normalizes layout anomalies, and splits documents into configurable overlapping chunks.
@@ -49,7 +77,7 @@ flowchart TD
 *   **📊 Local Evaluation & Monitoring:** Logs system metrics to SQLite. Metrics calculated per request include:
     *   **Recall@K:** Percentage of retrieved chunks with a similarity score exceeding the relevance boundary (`>= 0.55`).
     *   **Citation Coverage:** Ratio of retrieved passages actually cited (`[Source N]`) in the generated answer.
-    *   **Grounding Score:** Text overlap between the generated answer and retrieved context to measure grounding.
+    *   **Grounding Score:** Word overlap between the generated answer and retrieved context to measure grounding.
     *   **Matplotlib Dashboard:** Visualizes latency, recall over time, grounding, and citation coverage.
 *   **📥 Premium Export Formats:** Supports downloading generated answers in 6 formats:
     *   `docx`: Styled Word documents using custom spacing and layouts.
@@ -250,3 +278,21 @@ All backend communication passes through the FastAPI application running on `htt
 *   **Endpoint:** `GET /metrics`
 *   **Headers:** None
 *   **Response:** Provides aggregate statistics (avg latency, avg grounding score, total queries count) and a list of the 10 most recent query logs.
+
+---
+
+## 🚀 Future Enhancements
+
+The following features are planned for future releases (derived from optional project extensions):
+1.  **🔍 Hybrid Retrieval:** Combine semantic vector search (FAISS) with lexical keyword-based search (e.g. BM25) to improve query coverage.
+2.  **📈 Local Reranking Models:** Integrate a cross-encoder model (such as `ms-marco-MiniLM-L-6-v2`) to perform post-retrieval reranking and boost precision.
+3.  **📊 Custom Dashboards:** Enhance UI telemetry with time-series charts illustrating query distribution, database hit rates, and metrics trend analysis.
+4.  **🤖 Agentic Tool Calling:** Give the LLM capability to dynamically run tool triggers (e.g. reindexing files, triggering exports, or calling external APIs) based on chat input.
+5.  **🐳 Containerization:** Dockerize the entire project with `docker-compose` to package backend, frontend, database, and Ollama in a single file-system build.
+
+---
+
+## ✍️ Author
+
+*   **Ayan Banerjee** - [@ayanbanerjee-png](https://github.com/ayanbanerjee-png)
+*   **Project Repository:** [AI-KNOWLEDGE-ASSISTANT](https://github.com/ayanbanerjee-png/AI-KNOWLEDGE-ASSISTANT.git)
